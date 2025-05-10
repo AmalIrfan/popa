@@ -1,7 +1,7 @@
 Popa
 ====
 
-A cheap copy of Forth that works like a virtual machine.
+A cheep copy of Forth that works like a virtual machine.
 
 ## Build
 
