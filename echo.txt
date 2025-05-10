@@ -1,0 +1,3 @@
+: nl?       10 eq ;
+: write!nl  dup nl? not if write exit then drop ;
+: echo      begin read dup write!nl nl? until 10 write ;

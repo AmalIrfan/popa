@@ -1,0 +1,31 @@
+1: define a code field
+2: define a data stack
+3: define a return stack
+4: define a word field
+5: define a dictionary mapping word fields to index in code field
+6: define bytecodes that perform basic actions
+7: intialise dictionary (intrinsic words)
+8: define mode to be interpreter or compiler
+9: if interpreter mode do 11 through 12
+10: if compiler mode do 14 through 15
+11: get_next word
+12: if word is a number push it to stack, if word is a intrepreter word do action, if in dictionary
+    execute the index from dictionary. print ok. if word is recognised else print no.
+14: get_next word
+15: if word is a number save the number and lit bytecode to code field, if compiler word do action,
+    if in dictionary save the index from dictionary to code field along with a call bytecode
+17: the system starts in intrepreter mode
+18: '[0-9]' literal
+18: intrinsic words: read, write, dup, drop, swap, over, sub
+19: intrepreter words: ':' start compile mode, 'print' print stacks, 'words' print table,
+    'load' load a file
+20: compile words: ';' save exit byte code and end compile mode,
+    'if' save a conditional jump and allocate space for address and push the location of address
+    to return stack,
+    'then' set address of previous 'if' using return stack to current address,
+    'begin' push current address to return stack,
+    'until' save a conditional jump to previous 'begin' using return stack,
+    simple words save the bytecode to code field: read, write, exit, dup, drop, swap, over, eq,
+    sub, not, or
+21: bytecodes: lit value, call address, exit, if address, until address, dup, drop, swap, over,
+    eq, sub, not, or
