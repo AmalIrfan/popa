@@ -1,2 +1,2 @@
-CFLAGS+=-g -fsanitize=address
+CFLAGS+=-g # -fsanitize=address
 main:
