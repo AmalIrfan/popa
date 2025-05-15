@@ -1,0 +1,18 @@
+  lit entry
+  call
+  -1
+msg: 72 69 76 76 79 44 32 87 79 82 76 68 33 10 0 0
+entry:
+  lit msg
+loop:
+  dup load ; msg c
+  dup ; msg c c
+  lit !null jnz ; msg c
+  drop
+  drop
+  exit
+!null:
+  nop ; msg c
+  write ; msg
+  lit -1 sub ; msg+1
+  lit 1 lit loop jnz
