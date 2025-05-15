@@ -4,6 +4,11 @@
 msg: 72 69 76 76 79 44 32 87 79 82 76 68 33 10 0 0
 entry:
   lit msg
+  lit puts call
+  exit
+
+puts:
+  nop ; msg
 loop:
   dup load ; msg c
   dup ; msg c c
