@@ -1,23 +1,105 @@
   lit entry
   call
   -1
-msg: 72 69 76 76 79 44 32 87 79 82 76 68 33 10 0 0
+buf: 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
 entry:
-  lit msg
-  lit puts call
+again:
+  lit buf     ; buf
+  lit getnext ; buf getnext
+  call
+
+  lit buf  ; buf
+  load     ; c
+  lit echo ; c echo
+  jnz
   exit
 
+echo:
+  lit buf  ; buf
+  lit puts ; buf puts
+  call
+  
+  lit 10 ; \n
+  write
+  
+  lit 1     ; 1
+  lit again ; 1 again
+  jnz
+
+getnext:
+loop1:
+  read       ; buf c
+  dup        ; buf c c
+  lit 32     ; buf c c 32
+  sub        ; buf c c-32
+  lit !space ; buf c c-32 !space
+  jnz        ; buf c
+space:
+  drop      ; buf
+  lit 1     ; buf 1
+  lit loop1 ; buf 1 loop1
+  jnz
+!space:
+  dup     ; buf c c
+  lit 10  ; buf c c 10
+  sub     ; buf c c-10
+  lit !nl ; buf c c-10 !nl
+  jnz     ; buf c
+nl:
+  drop      ; buf
+  lit 1     ; buf 1
+  lit loop1 ; buf 1 loop1
+  jnz
+!nl:
+loop2:
+  over        ; buf c buf
+  store       ; buf
+  lit -1      ; buf -1
+  sub         ; buf+1
+  read        ; buf' c
+  dup         ; buf' c c
+  lit 32      ; buf' c c 32
+  sub         ; buf' c c-32
+  lit !space2 ; buf' c c-32 !space2
+  jnz         ; buf' c
+space2:
+  drop  ; buf'
+  lit 0 ; buf' 0
+  swap  ; 0 buf'
+  store
+  exit
+!space2:
+  dup      ; buf' c c
+  lit 10   ; buf' c c 10
+  sub      ; buf' c c-10
+  lit !nl2 ; buf' c c-10 !nl2
+  jnz      ; buf' c
+nl2:
+  drop  ; buf'
+  lit 0 ; buf' 0
+  swap  ; 0 buf'
+  store
+  exit
+!nl2:
+  lit 1     ; buf' c 1
+  lit loop2 ; buf' c 1 loop2
+  jnz
+
 puts:
-  nop ; msg
-loop:
-  dup load ; msg c
-  dup ; msg c c
-  lit !null jnz ; msg c
-  drop
+loop3:
+  dup       ; buf buf 
+  load      ; buf c
+  dup       ; buf c c
+  lit !null ; buf c c !null
+  jnz       ; buf c
+null:
+  drop      ; buf
   drop
   exit
 !null:
-  nop ; msg c
-  write ; msg
-  lit -1 sub ; msg+1
-  lit 1 lit loop jnz
+  write     ; buf
+  lit -1    ; buf -1
+  sub       ; buf+1
+  lit 1     ; buf' 1
+  lit loop3 ; buf' 1 putsloop
+  jnz
