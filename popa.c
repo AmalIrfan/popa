@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdint.h>
 #include <stdbool.h>
 #include <string.h>
 #include <ctype.h>
@@ -26,7 +27,6 @@
     "   .s    print stack\n"\
 
 #define STACK 512
-
 
 struct state;
 
