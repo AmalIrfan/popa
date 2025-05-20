@@ -5,7 +5,7 @@ svm/build/%:
 	@$(MAKE) -C svm $(patsubst svm/%,%,$@)
 
 run: svm/build/main popa.bin
-	svm/build/main popa.bin
+	svm/build/main popa.bin 2> log
 
 clean:
 	rm popa.bin -f

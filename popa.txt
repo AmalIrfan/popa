@@ -25,21 +25,22 @@ getnext:
 loop1:
   cal getc   ; bl bh c
   dup        ; bl bh c c
+  bng eof    ; bl bh c
+  dup        ; bl bh c c
   lit 32     ; bl bh c c 32
   sub        ; bl bh c c-32
-  bnz space  ; bl bh c
-!space:
-  dup     ; bl bh c c
-  lit 10  ; bl bh c c 10
-  sub     ; bl bh c c-10
-  bnz !nl ; bl bh c
-space:
-nl:
-  drp      ; bl bh
-  lit 1     ; bl bh 1
-  bnz loop1
-!nl:
-loop2:
+  ovr        ; bl bh c c-32 c
+  lit 10     ; bl bh c c-32 c 10
+  sub        ; bl bh c c-32 c-10
+  and        ; bl bh c (c-32)&(c-10)
+  bnz captr  ; bl bh c
+  drp        ; bl bh
+  lit 1      ; bl bh 1
+  bnz loop1  ; bl bh
+
+captr:
+  dup         ; bl bh c c
+  bng eof     ; bl bh c
   lit 0       ; bl bh c 0
   psh         ; bl bh
   ovr         ; bl bh bl
@@ -60,17 +61,13 @@ loop2:
   dup         ; bl' bh c c
   lit 32      ; bl' bh c c 32
   sub         ; bl' bh c c-32
-  bnz space2  ; bl' bh c
-!space2:
-  dup      ; bl' bh c c
-  lit 10   ; bl' bh c c 10
-  sub      ; bl' bh c c-10
-  bnz nl2  ; bl' bh c
-!nl2:
-  lit 1     ; bl' bh c 1
-  bnz loop2 ; bl' bh c
-space2:
-nl2:
+  ovr         ; bl' bh c c-32 c
+  lit 10      ; bl' bh c c-32 c 10
+  sub         ; bl' bh c c-32 c-10
+  and         ; bl' bh c (c-32)&(c-10)
+  bnz captr   ; bl' bh c
+
+eof:
   drp   ; bl' bh
   lit 0 ; bl' bh 0
   rot   ; bh 0 bl'
@@ -85,11 +82,12 @@ loop3:
   fch       ; bl bh c
   dup       ; bl bh c c
   bnz !null ; bl bh c
-null:
+
   drp      ; bl bh
   drp      ; bl
   drp
   ret
+
 !null:
   cal putc  ; bl bh
   lit 1     ; bl bh 1
