@@ -1,96 +1,125 @@
-  lit entry
-  call
-  -1
+  cal entry
+  hlt
 buf: 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
 entry:
 again:
-  lit buf     ; buf
-  lit getnext ; buf getnext
-  call
+  lad buf     ; bl bh
+  cal getnext
 
-  lit buf  ; buf
-  load     ; c
-  lit echo ; c echo
-  jnz
-  exit
+  lad buf  ; bl bh
+  fch      ; c
+  bnz echo
+  ret
 
 echo:
-  lit buf  ; buf
-  lit puts ; buf puts
-  call
+  lad buf  ; bl bh
+  cal puts
   
-  lit 10 ; \n
-  write
+  lit 10    ; \n
+  cal putc
   
   lit 1     ; 1
-  lit again ; 1 again
-  jnz
+  bnz again ; 1
 
 getnext:
 loop1:
-  read       ; buf c
-  dup        ; buf c c
-  lit 32     ; buf c c 32
-  eq         ; buf c c==32
-  lit space  ; buf c c==32 space
-  jnz        ; buf c
+  cal getc   ; bl bh c
+  dup        ; bl bh c c
+  lit 32     ; bl bh c c 32
+  sub        ; bl bh c c-32
+  bnz space  ; bl bh c
 !space:
-  dup     ; buf c c
-  lit 10  ; buf c c 10
-  neq     ; buf c c!=10
-  lit !nl ; buf c c!=10 !nl
-  jnz     ; buf c
+  dup     ; bl bh c c
+  lit 10  ; bl bh c c 10
+  sub     ; bl bh c c-10
+  bnz !nl ; bl bh c
 space:
 nl:
-  drop      ; buf
-  lit 1     ; buf 1
-  lit loop1 ; buf 1 loop1
-  jnz
+  drp      ; bl bh
+  lit 1     ; bl bh 1
+  bnz loop1
 !nl:
 loop2:
-  over        ; buf c buf
-  store       ; buf
-  lit 1       ; buf 1
-  add         ; buf+1
-  read        ; buf' c
-  dup         ; buf' c c
-  lit 32      ; buf' c c 32
-  eq          ; buf' c c==32
-  lit space2  ; buf' c c==32 space2
-  jnz         ; buf' c
+  lit 0       ; bl bh c 0
+  psh         ; bl bh
+  ovr         ; bl bh bl
+  ovr         ; bl bh bl bh
+  pop         ; bl bh bl bh c 0
+  drp         ; bl bh bl bh c
+  rot         ; bl bh bh c bl
+  rot         ; bl bh c bl bh
+  put         ; bl bh 
+  lit 1       ; bl bh  1
+  rot         ; bh 1 bl
+  add         ; bh 1+bl
+  ovr         ; bh bl' bh
+  psh         ; bh
+  drp
+  pop         ; bl' bh
+  cal getc    ; bl' bh c
+  dup         ; bl' bh c c
+  lit 32      ; bl' bh c c 32
+  sub         ; bl' bh c c-32
+  bnz space2  ; bl' bh c
 !space2:
-  dup      ; buf' c c
-  lit 10   ; buf' c c 10
-  eq       ; buf' c c==10
-  lit nl2  ; buf' c c==10 nl2
-  jnz      ; buf' c
+  dup      ; bl' bh c c
+  lit 10   ; bl' bh c c 10
+  sub      ; bl' bh c c-10
+  bnz nl2  ; bl' bh c
 !nl2:
-  lit 1     ; buf' c 1
-  lit loop2 ; buf' c 1 loop2
-  jnz
+  lit 1     ; bl' bh c 1
+  bnz loop2 ; bl' bh c
 space2:
 nl2:
-  drop  ; buf'
-  lit 0 ; buf' 0
-  swap  ; 0 buf'
-  store
-  exit
+  drp   ; bl' bh
+  lit 0 ; bl' bh 0
+  rot   ; bh 0 bl'
+  rot   ; 0 bl' bh
+  put
+  ret
 
 puts:
 loop3:
-  dup       ; buf buf 
-  load      ; buf c
-  dup       ; buf c c
-  lit !null ; buf c c !null
-  jnz       ; buf c
+  ovr       ; bl bh bl
+  ovr       ; bl bh bl bh
+  fch       ; bl bh c
+  dup       ; bl bh c c
+  bnz !null ; bl bh c
 null:
-  drop      ; buf
-  drop
-  exit
+  drp      ; bl bh
+  drp      ; bl
+  drp
+  ret
 !null:
-  write     ; buf
-  lit 1     ; buf 1
-  add       ; buf+1
-  lit 1     ; buf' 1
-  lit loop3 ; buf' 1 putsloop
-  jnz
+  cal putc  ; bl bh
+  lit 1     ; bl bh 1
+  rot       ; bh 1 bl
+  add       ; bh 1+bl
+  ovr       ; bh bl' bh
+  psh       ; bh
+  drp
+  pop       ; bl' bh
+  lit 1     ; bl' bh 1
+  bnz loop3 ; bl' bh
+
+
+PORT_IN= 65021
+PORT_OUT= 65022
+PORT_DATA= 65023
+
+
+getc:
+  lad PORT_IN ; PORT_IN
+  fch         ; 0
+  drp
+  lad PORT_DATA ; PORT_DATA
+  fch           ; c
+  ret
+
+putc:
+  lad PORT_DATA ; c PORT_DATA
+  put
+  lad PORT_OUT ; PORT_OUT
+  fch          ; 0
+  drp
+  ret

@@ -2,6 +2,8 @@
 #include <stdio.h>
 #include "svm/svm.h"
 
+uint32_t compiler = SVM_CAL << 24 | /* COMPILER */38 << 8 | SVM_HLT;
+
 struct definition {
     uint8_t name_index;
     uint8_t code_index;
@@ -16,7 +18,7 @@ struct definition {
 struct definition dictionary[DICTIONARY];
 uint8_t dictionary_used = 0;
 
-#define NAMES 294
+#define NAMES 292
 
 int8_t names[NAMES];
 uint8_t names_used = 0;
@@ -54,7 +56,7 @@ int define(const int8_t* name, const uint8_t* code, uint8_t flags) {
 }
 
 int define_simple(const int8_t* name, const uint8_t code, uint8_t flags) {
-    const unint8_t code_[] = {code, 0};
+    const uint8_t code_[] = {code, 0};
     return define(name, code_, flags);
 }
 
@@ -73,35 +75,44 @@ int main() {
     define_simple("@", SVM_FCH, 0);
     define_simple("!", SVM_PUT, 0);
     {
-        const uint8_t code[] = {SVM_LIT, SVM_CALL, <GETNEXT>, <FIND>, 2, SVM_RET, 0};
-        define("CALL", code, 1); this is a immediate the checks if the given def is callable
+        const uint8_t code[] = {SVM_LIT, SVM_CAL, /* GETNEXT */0, /* FIND */ 0, 2, SVM_RET, 0};
+        define("CALL", code, 1);
     }
     {
-        const uint8_t code[] = {SVM_LIT, SVM_LIT, SVM_CAL, <GETNEXT>, 2, SVM_RET, 0};
-        define("LIT", code, 1); executed by compiler
+        const uint8_t code[] = {SVM_LIT, SVM_LIT, SVM_CAL, /* GETNEXT */0, 2, SVM_RET, 0};
+        define("LIT", code, 1);
     }
     {
-        const uint8_t code[] = {SVM_LIT, SVM_LAD, SVM_CAL, <GETADDR>, 2, SVM_RET, 0};
-        define("LAD", code, 1); executed by compiler when a address is met
+        const uint8_t code[] = {SVM_LIT, SVM_LAD, SVM_CAL, /* GETADDR */0, 3, SVM_RET, 0};
+        define("LAD", code, 1);
     }
     {
-        const uint8_t code[] = {...};
+        const uint8_t code[] = {SVM_GET, SVM_RET, 0};
         define("GETNEXT", code, 0);
     }
     {
-        const uint8_t code[] = {...};
+        const uint8_t code[] = {SVM_LAD, 0xFFFF - 0x301, SVM_FCH, SVM_DRP, SVM_LAD, 0xFFFF - 0x300, SVM_FCH, SVM_RET, 0};
+        define("GETCH", code, 0);
+    }
+    {
+        const uint8_t code[] = {SVM_CALL, //};
         define("GETADDR", code, 0);
     }
     {
-        const uint8_t code[] = {...};
+        const uint8_t code[] = {0};
         define("FIND", code, 0);
     }
     {
-        const uint8_t code[] = {...};
-        define("MAIN", code, 0);
+        const uint8_t code[] = {0};
+        define("COMPILER", code, 0);
     }
-    fwrite(<MAIN>, 1, 2, stdout);
+    fwrite(&compiler, 1, sizeof(compiler), stdout);
     fwrite(dictionary, 1, _DICTIONARY, stdout);
     fwrite(names, 1, NAMES, stdout);
     fwrite(codes, 1, CODES, stdout);
+    for (int i = 0; i < dictionary_used; i++) {
+        fprintf(stderr, "%s %hd\n",
+            names + dictionary[i].name_index,
+            dictionary[i].code_index);
+    }
 }
