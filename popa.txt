@@ -1,6 +1,9 @@
   cal entry
   hlt
+; names
+addname: 43 0
 buf: 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0
+msg: 65 68 68 73 78 71 33 33 10 0 0 0 0 0 0 0
 entry:
 again:
   lad buf     ; bl bh
@@ -8,8 +11,20 @@ again:
 
   lad buf  ; bl bh
   fch      ; c
-  bnz echo
+  bnz test
   ret
+
+test:
+  lad buf     ; bl bh
+  lad addname ; bl bh al ah
+  cal strcmp  ; df
+  bnz echo
+
+  lad msg     ; ml mh
+  cal puts
+
+  lit 1
+  bnz echo
 
 echo:
   lad buf  ; bl bh
@@ -20,6 +35,44 @@ echo:
   
   lit 1     ; 1
   bnz again ; 1
+
+strcmp:
+  nop  ; bl bh al ah
+loop4:
+  ovr      ; bl bh al ah al
+  ovr      ; bl bh al ah al ah
+  psh      ; bl bh al ah
+  fch      ; bl bh c
+  rot      ; bh c bl
+  rot      ; c bl bh
+  ovr      ; c bl bh bl
+  ovr      ; c bl bh bl bh
+  psh      ; c bl bh
+  fch      ; c d
+  ovr      ; c d c
+  ovr      ; c d c d
+  sub      ; c d c-d
+  dup      ; c d df df
+  bnz diff ; c d df
+  rot      ; d df c
+  bnz gc   ; d df
+  ovr      ; d df d
+  psh      ; d
+  drp
+  pop      ; df d
+  drp      ; df
+  lit 1    ; df 1
+  bnz diff
+gc:
+  ovr       ; d df d
+  psh       ; d
+  drp
+  pop       ; df d
+  bnz loop4 ; df
+
+diff:
+  nop ; df
+  ret
 
 getnext:
 loop1:
